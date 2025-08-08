@@ -14,7 +14,7 @@ var authBaseURL = 'https://runs.io';
 var authVerifyHandler = '/verify';
 var authLogoutHandler = '/logout';
 
-var backendBaseURL = 'https://fitrep.herokuapp.com';
+var backendBaseURL = 'https://navfit99.onrender.com';
 var backendFileHandler = '/file';
 var backendFileUUIDKey = 'fileUUID';
 

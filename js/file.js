@@ -1,4 +1,3 @@
-//var backendBaseURL = 'https://fitrep.herokuapp.com/';
 var folders = []; //array
 var reports = {}; //map
 var retrievedFolders = []; //array of IDs
