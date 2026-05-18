@@ -34,6 +34,27 @@ function createChangeID(scope, type, updatedObj) {
 	return 'scope' + scope + 'object' + objectKeyword;
 }
 
+function getMaskedReportSSN(reportMap) {
+	if (reportMap[reportSSNKey])
+		return 'XXX-XX-' + reportMap[reportSSNKey].substr(reportMap[reportSSNKey].length - 4);
+
+	return "No SSN";
+}
+
+function getReportTitleText(reportMap) {
+	return reportMap[reportRateKey] + ' ' + reportMap[reportNameKey];
+}
+
+function updateReportElement(reportMap) {
+	var reportElement = $('#report' + reportMap[reportIDKey]);
+
+	if (reportElement.length == 0)
+		return;
+
+	reportElement.find('.report-title').text(getReportTitleText(reportMap));
+	reportElement.find('.report-comment').text(getMaskedReportSSN(reportMap));
+}
+
 function reloadUIForFolderOrReport(object) {
 	if (object[folderIDKey] != null) { //update for Folder
 		loadFoldersFromServer();
@@ -48,7 +69,7 @@ function reloadUIForFolderOrReport(object) {
 	}
 }
 
-function logPendingChange(scope, type, updatedObj) {
+function logPendingChange(scope, type, updatedObj, refreshUI) {
 	var changeID = createChangeID(scope, type, updatedObj);
 
 	if (!pendingChanges[changeID])		
@@ -63,7 +84,11 @@ function logPendingChange(scope, type, updatedObj) {
 	$('#save-btn').prop('disabled', false);
 	$('#save-counter').show();
 	
-	reloadUIForFolderOrReport(updatedObj);
+	if (refreshUI !== false) {
+		reloadUIForFolderOrReport(updatedObj);
+	} else if (scope == EditScopeEnum.report && type != EditOpEnum.delete) {
+		updateReportElement(updatedObj);
+	}
 }
 
 function createNewFolderMap(parentID) {
@@ -380,22 +405,16 @@ function createReportElement(reportMap) {
 			id: reportMap[reportIDKey],
 		});
 
-		var maskedSSN;
-		if (reportMap[reportSSNKey])
-			maskedSSN = 'XXX-XX-' + reportMap[reportSSNKey].substr(reportMap[reportSSNKey].length - 4);
-		else
-			maskedSSN = "No SSN";
-
 		//report title span
 		var title = jQuery('<span/>', {
 			class: 'report-title',
-			text: reportMap[reportRateKey] + ' ' + reportMap[reportNameKey],
+			text: getReportTitleText(reportMap),
 		});
 
 		//report comment span
 		var comment = jQuery('<span/>', {
 			class: 'report-comment',
-			text: maskedSSN 
+			text: getMaskedReportSSN(reportMap)
 		});
 
 		//report actions container

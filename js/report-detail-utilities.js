@@ -240,5 +240,5 @@ function modifyReportMapAndLogPendingChange(reportID, inputElement) {
 
 	
 
-	logPendingChange(EditScopeEnum.report, EditOpEnum.update, reports[reportID]);
+	logPendingChange(EditScopeEnum.report, EditOpEnum.update, reports[reportID], false);
 }
