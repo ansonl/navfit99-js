@@ -215,7 +215,7 @@ function modifyReportMapAndLogPendingChange(reportID, inputElement) {
 		if (inputElement.is('input[type=text]')) {
 			var blockInputs = $('input[name=' + inputElement.attr('name'));
 			for (var i = 0; i < blockInputs.length; i++) {
-				if (inputElement == blockInputs[i])
+				if (inputElement[0] == blockInputs[i])
 					reports[reportID][blockKeys[i]] = inputElement.val();
 			}
 			
@@ -224,7 +224,7 @@ function modifyReportMapAndLogPendingChange(reportID, inputElement) {
 		} else if (inputElement.is('input[type=checkbox]')) {
 			//unimplemented
 		} else if (inputElement.is('input[type=radio]')) { //EX: fitrep block5
-			var selectedRadio = parseInt(inputElement.val())-1;
+			var selectedRadio = parseInt(inputElement.val(), 10);
 			for (var i = 0; i < blockKeys.length; i++) {
 				if (i == selectedRadio) {
 					reports[reportID][blockKeys[i]] = true;

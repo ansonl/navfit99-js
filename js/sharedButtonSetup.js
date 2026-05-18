@@ -15,7 +15,7 @@ function editFormSubmitted() {
 	$('.action-btn:not(#edit-btn)').removeClass('btn-primary btn-warning');
 
 	$('#edit-close-btn').hide();
-	$('#edit-uuid-text').prop('disabled', true);
+	$('#edit-uuid-text').prop('readonly', true);
 	$('#edit-submit-btn').prop('disabled', true);
 }
 

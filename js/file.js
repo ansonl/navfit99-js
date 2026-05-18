@@ -58,7 +58,11 @@ function updateReportElement(reportMap) {
 function reloadUIForFolderOrReport(object) {
 	if (object[folderIDKey] != null) { //update for Folder
 		loadFoldersFromServer();
-		loadReportsForFolderFromServer(object[folderIDKey], null);
+		if (pendingFolderCreateExists(object)) {
+			markFolderRetrieved(object[folderIDKey]);
+		} else {
+			loadReportsForFolderFromServer(object[folderIDKey], null);
+		}
 	} else if (object[reportIDKey] != null) {
 		var parentFolderID = parseInt(object[reportParentIDKey].split(" ")[1]);
 		loadReportsForFolderFromServer(parentFolderID, null);
@@ -111,22 +115,44 @@ function retrieveAllFolders(callback) {
 	//Get all folders' reports that have not been already retrieved. Need all reports to determine new reportID
 	var allFolderRetrieved = true;
 	for (var i = 0; i < folders.length; i++) {
-		var folderRetrieved = false;
-		for (var j = 0; j < retrievedFolders.length; j++) {
-			if (folders[i][folderIDKey] == retrievedFolders[j]) {
-				folderRetrieved = true;
-				break;
-			}
-		}
-
+		var folderID = folders[i][folderIDKey];
+		var folderRetrieved = folderReportsWereRetrieved(folderID);
+	
 		if (folderRetrieved == false) {
+			if (pendingFolderCreateExists(folders[i])) {
+				markFolderRetrieved(folderID);
+				continue;
+			}
+
 			allFolderRetrieved = false;
-			loadReportsForFolderFromServer(folders[i][folderIDKey], callback);
+			loadReportsForFolderFromServer(folderID, callback);
 		}
 	}
 
 	if (allFolderRetrieved)
 		callback();
+}
+
+function folderReportsWereRetrieved(folderID) {
+	for (var i = 0; i < retrievedFolders.length; i++) {
+		if (retrievedFolders[i] == folderID)
+			return true;
+	}
+	return false;
+}
+
+function markFolderRetrieved(folderID) {
+	if (!folderReportsWereRetrieved(folderID))
+		retrievedFolders.push(folderID);
+}
+
+function pendingFolderCreateExists(folderMap) {
+	var pendingFolderCreate = createChangeID(
+		EditScopeEnum.folder,
+		EditOpEnum.new,
+		folderMap
+	);
+	return pendingChanges[pendingFolderCreate] && pendingChanges[pendingFolderCreate][editOpKey] == EditOpEnum.new;
 }
 
 function createNewReportMap(parentID) {
@@ -640,7 +666,7 @@ function loadData(fileUUID, type, typeData, callback) {
     				break;
     			case 3:
     				processReports(data['NavFitDatabase']);
-    				retrievedFolders.push(typeData);
+    				markFolderRetrieved(typeData);
     				break;
     			default:
     				console.log('Unknown type '+ type);
@@ -671,7 +697,7 @@ function loadData(fileUUID, type, typeData, callback) {
 }
 
 function executeNextChange(changeKeyArray) {
-	var currentKey = changeKeyArray.pop();
+	var currentKey = changeKeyArray.shift();
 
 	//If no more keys left, all changes have been processed
 	if (!currentKey) {
