@@ -33,7 +33,7 @@ $('#filelist').empty();
 
   	(function(navfitUUID, element){
       element.click(function(e) {
-      	document.location.replace('/file.html?uuid=' + navfitUUID);
+        document.location.replace('/file.html?' + fileUUIDKey + '=' + encodeURIComponent(navfitUUID));
   		});
     })(navfitList[i], filenameElement);
 

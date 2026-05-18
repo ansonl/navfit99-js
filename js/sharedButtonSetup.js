@@ -150,9 +150,9 @@ function setupExportButton() {
 			editorID = authStruct.editorID;
 			authToken = authStruct.authToken;
 
-			document.location.assign(backendBaseURL + backendDownloadHandler + createParamString({'fileUUID' : getUrlParameter(fileUUIDKey), 'editorID' : editorID, 'authToken' : authToken}));
+			document.location.assign(backendBaseURL + backendDownloadHandler + createParamString({'fileUUID' : getFileUUID(), 'editorID' : editorID, 'authToken' : authToken}));
 		} else {
-			document.location.assign(backendBaseURL + backendDownloadHandler + createParamString({'fileUUID' : getUrlParameter(fileUUIDKey)}));
+			document.location.assign(backendBaseURL + backendDownloadHandler + createParamString({'fileUUID' : getFileUUID()}));
 		}
 
 		$('#export-loader-aspect').hide();
@@ -163,7 +163,7 @@ function setupShareButton() {
 	$('#send-link-btn').prop('disabled', false);
 
 	$('#send-link-btn').click(function(e) {
-		showWarnAlertWithTextWithLink('NAVFIT access link', document.location.protocol + '//' + document.location.host + frontendFileHandler + '?uuid=' + getUrlParameter(fileUUIDKey));
+		showWarnAlertWithTextWithLink('NAVFIT access link', document.location.protocol + '//' + document.location.host + frontendFileHandler + '?' + fileUUIDKey + '=' + encodeURIComponent(getFileUUID()));
 	});
 }
 

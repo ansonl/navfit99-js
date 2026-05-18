@@ -578,7 +578,7 @@ function loadFoldersFromServer() {
 		return;
 	}
 
-	loadData(getUrlParameter(fileUUIDKey), 1, null, null);
+	loadData(getFileUUID(), 1, null, null);
 }
 
 function loadReportsForFolderFromServer(folderID, callback) {
@@ -599,7 +599,7 @@ function loadReportsForFolderFromServer(folderID, callback) {
 		}
 	}
 
-	loadData(getUrlParameter(fileUUIDKey), 3, folderID, callback);
+	loadData(getFileUUID(), 3, folderID, callback);
 }
 
 /*
@@ -711,7 +711,7 @@ function executeNextChange(changeKeyArray) {
 	  data: {
 	  	'editorID': editorID,
     	'authToken': authToken,
-	  	'fileUUID': getUrlParameter(fileUUIDKey),
+      'fileUUID': getFileUUID(),
 	  	'editScope': parseInt(pendingChanges[currentKey][editScopeKey]) - 1,
 	  	'editOp': parseInt(pendingChanges[currentKey][editOpKey]),
 	  	'navfitNewData': pendingChanges[currentKey][newDataKey],
@@ -773,7 +773,7 @@ function executeDeleteNavFit() {
 	  data: {
 	  	'editorID': editorID,
     	'authToken': authToken,
-	  	'fileUUID': getUrlParameter(fileUUIDKey),
+      'fileUUID': getFileUUID(),
 	  	'editScope': EditScopeEnum.navfit - 1,
 	  	'editOp': EditOpEnum.delete,
 	  },
@@ -848,7 +848,7 @@ function showCurrentLocalNavFitJSON() {
 }
 
 $(document).ready(function() {
-	console.log(getUrlParameter(fileUUIDKey));
+	console.log(getFileUUID());
 
 	loadFoldersFromServer();
 

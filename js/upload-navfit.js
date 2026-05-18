@@ -41,7 +41,7 @@ function uploadFile() {
     	if (data['Status'] == 0) {
     		$('.action-btn:not(#import-btn)').removeClass('btn-primary btn-warning');
     		$('#import-btn').text("Loading");
-      	document.location.replace('/file.html?uuid=' + data['StatusData']);      	
+        document.location.replace('/file.html?' + fileUUIDKey + '=' + encodeURIComponent(data['StatusData']));
     	} else {
     		enableMainUI();
     		showErrorAlertWithText(data['StatusData']);

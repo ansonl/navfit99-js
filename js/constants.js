@@ -1,5 +1,6 @@
 //js GET params
-var fileUUIDKey = 'uuid';
+var fileUUIDKey = 'fileUUID';
+var legacyFileUUIDKey = 'uuid';
 var authErrorKey = 'authError';
 
 //auth parameter names for auth server
@@ -90,7 +91,11 @@ function getAuthStruct(silent) {
 	} else {
 		sessionStorage.setItem(urlEditorIDKey, storedEditorID);
 		sessionStorage.setItem(urlAuthTokenKey, storedAuthToken);
-		document.location.replace(document.location.protocol + '//' + document.location.host + document.location.pathname);
+
+		var currentURL = new URL(document.location.href);
+		currentURL.searchParams.delete(urlEditorIDKey);
+		currentURL.searchParams.delete(urlAuthTokenKey);
+		document.location.replace(currentURL.toString());
 	}
 
 	return {editorID: storedEditorID, authToken: storedAuthToken};
@@ -147,3 +152,11 @@ var getUrlParameter = function getUrlParameter(sParam) {
         }
     }
 };
+
+function getFileUUID() {
+	var fileUUID = getUrlParameter(fileUUIDKey);
+	if (fileUUID === undefined || fileUUID === null || fileUUID === '') {
+		fileUUID = getUrlParameter(legacyFileUUIDKey);
+	}
+	return fileUUID;
+}
