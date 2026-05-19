@@ -208,6 +208,8 @@ function modifyReportMapAndLogPendingChange(reportID, inputElement) {
 			reports[reportID][blockKeys[0]] = inputElement.is(':checked') ? true : false;
 		} else if (inputElement.is('input[type=radio]')) {
 			reports[reportID][blockKeys[0]] = parseInt(inputElement.val()); //ratings for perf displayed range 0-5, access values 0-5
+		} else if (inputElement.is('select')) {
+			reports[reportID][blockKeys[0]] = inputElement.val();
 		} else {
 			console.log('Unknown input element block number' + blockNumber + ' element ' + inputElement);
 		}
