@@ -1,0 +1,87 @@
+name: Sync GitHub Pages mirror
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+concurrency:
+  group: pages-mirror-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    name: Sync navfit99.github.io
+    if: github.repository == 'ansonl/navfit99-js'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Configure mirror SSH key
+        shell: bash
+        env:
+          PAGES_MIRROR_DEPLOY_KEY: ${{ secrets.PAGES_MIRROR_DEPLOY_KEY }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${PAGES_MIRROR_DEPLOY_KEY}" ]]; then
+            echo "::error::PAGES_MIRROR_DEPLOY_KEY repository secret is not set."
+            exit 1
+          fi
+
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${PAGES_MIRROR_DEPLOY_KEY}" > ~/.ssh/pages_mirror_deploy_key
+          chmod 600 ~/.ssh/pages_mirror_deploy_key
+
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+          cat > ~/.ssh/config <<'EOF'
+          Host github.com
+            HostName github.com
+            User git
+            IdentityFile ~/.ssh/pages_mirror_deploy_key
+            IdentitiesOnly yes
+          EOF
+          chmod 600 ~/.ssh/config
+
+      - name: Sync mirror branch
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          source_sha="$(git rev-parse HEAD)"
+
+          git remote add pages git@github.com:navfit99/navfit99.github.io.git
+          git fetch --prune pages '+refs/heads/master:refs/remotes/pages/master'
+
+          mirror_sha="$(git rev-parse refs/remotes/pages/master)"
+          if [[ "${mirror_sha}" == "${source_sha}" ]]; then
+            echo "Mirror already matches source at ${source_sha}."
+            exit 0
+          fi
+
+          if ! git merge-base --is-ancestor "${mirror_sha}" "${source_sha}"; then
+            echo "::error::Mirror master (${mirror_sha}) is not an ancestor of source HEAD (${source_sha}); refusing non-force sync."
+            echo "Merge or reconcile mirror-only changes into the source repo before syncing."
+            exit 1
+          fi
+
+          git push pages "${source_sha}:refs/heads/master"
+
+          pushed_sha="$(git ls-remote pages refs/heads/master | awk '{print $1}')"
+          if [[ "${pushed_sha}" != "${source_sha}" ]]; then
+            echo "::error::Mirror verification failed: expected ${source_sha}, got ${pushed_sha:-<missing>}."
+            exit 1
+          fi
+
+          echo "Mirror updated to ${source_sha}."
