@@ -3,6 +3,7 @@ var reports = {}; //map
 var retrievedFolders = []; //array of IDs
 
 var pendingChanges = {};
+var initialFolderReportsLoaded = false;
 
 function disableMainUI() {
 	$('.action-btn').prop('disabled', true);
@@ -332,10 +333,7 @@ function createFolderElement(folderMap) {
       element.click(function(e) {
       	e.stopPropagation();
 
-      	if ($('.folder-selected').length > 0)
-      		$('.folder-selected').removeClass('folder-selected');
-      	$('#folderTitle' + folderID).addClass('folder-selected');
-
+      selectFolderTitle(folderID);
       	loadReportsForFolderFromServer(folderID, null);
   		});
     })(folderMap[folderIDKey], title);
@@ -572,6 +570,8 @@ function processFolders(data) {
 
 		containingFolderInterior.append(singleFolderElement);
 	}
+
+	loadInitialFolderReportsIfNeeded();
 }
 
 function processReports(data) {
@@ -595,6 +595,38 @@ function processReports(data) {
 		containingInterior.append(singleReportElement);
 	}	
 
+}
+
+function selectFolderTitle(folderID) {
+	if ($('.folder-selected').length > 0)
+		$('.folder-selected').removeClass('folder-selected');
+
+	$('#folderTitle' + folderID).addClass('folder-selected');
+}
+
+function getDefaultInitialFolderID() {
+	if (folders.length == 0)
+		return null;
+
+	for (var i = 0; i < folders.length; i++) {
+		if (folders[i][folderParentKey] == 0)
+			return folders[i][folderIDKey];
+	}
+
+	return folders[0][folderIDKey];
+}
+
+function loadInitialFolderReportsIfNeeded() {
+	if (initialFolderReportsLoaded)
+		return;
+
+	var folderID = getDefaultInitialFolderID();
+	if (folderID == null)
+		return;
+
+	initialFolderReportsLoaded = true;
+	selectFolderTitle(folderID);
+	loadReportsForFolderFromServer(folderID, null);
 }
 
 function loadFoldersFromServer() {
